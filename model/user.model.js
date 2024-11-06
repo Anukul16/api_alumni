@@ -3,16 +3,45 @@ class user_detailsModel {
     constructor(db) {
         this.db = db;
     }
-
-    insertRecord(user_id, email, password, users_name, pin, mobile_number, user_type, callBack) {
-        var sql = "INSERT INTO `users`(`user_id`, `email`, `password`, `users_name`, `pin`, `mobile_number`, `user_type`, `doj`, `address`, `photo`, `background_photo`, `exponent_token`) VALUES (?, ?, ?, ?, ?, ?, ?, current_timestamp, 'null', '', '', '[]')";
-        var params = [user_id, email, password, users_name, pin, mobile_number, user_type];
-        this.db.execute(sql, params, callBack);
+    register(user_id,name,passout_year,phone_number,email,password,callBack){
+        var sql = "INSERT INTO `users` (`user_id`, `name`, `passout_year`, `phone_number`, `email`, `password`, `created_at`) VALUES (?, ?, ?, ?, ?, ?, current_timestamp)";
+        var params = [user_id,name,passout_year,phone_number,email,password];
+        this.db.query(sql,params,callBack)
     }
-    createUserId(email, callBack) {
+    editProfile(name, passout_year, designation, location, phone_number, whatsapp_number, email, linkedin, current_addr, permanent_addr, skills,user_id, callBack) {
+        var sql = `
+            UPDATE \`users\` 
+            SET 
+                \`name\` = ?,
+                \`passout_year\` = ?,
+                \`designation\` = ?,
+                \`location\` = ?,
+                \`phone_number\` = ?,
+                \`whatsapp_number\` = ?,
+                \`email\` = ?,
+                \`linkedin_id\` = ?,
+                \`current_address\` = ?,
+                \`permanent_address\` = ?,
+                \`skills\` = ?
+            WHERE \`user_id\` = ?;
+        `;
+        console.log("Linkedin Id: ",linkedin);
+        
+        var params = [name, passout_year, designation, location, phone_number, whatsapp_number, email, linkedin, current_addr, permanent_addr, skills, user_id];
+        this.db.query(sql, params, callBack);
+    }
+    
+    createUserId(id,passout_year, callBack) {
         this.db.execute(
-            `UPDATE users SET user_id = CONCAT(CONCAT('DU', LPAD(id, 8, '0')), 'RL') WHERE email=?;`,
-            [email],
+            `UPDATE users 
+                SET user_id = CONCAT(
+                    'VUCS', 
+                    id,
+                    LPAD(FLOOR(RAND() * 90) + 10, 2, '0'),
+                    RIGHT(?, 2)
+                ) 
+                WHERE id = ?;`,
+            [passout_year,id],
             callBack
         )
     }
@@ -34,13 +63,6 @@ class user_detailsModel {
         this.db.query(
             `UPDATE users set is_deleted=0 where email=?;`,
             [email],
-            callBack
-        )
-    }
-    getUserByAdharNo(ahdhar_number, callBack) {
-        this.db.query(
-            "SELECT * FROM `users` WHERE adhar_no=?",
-            [ahdhar_number],
             callBack
         )
     }

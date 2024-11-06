@@ -1,22 +1,21 @@
-const communication_functions = require('../helpers/communication');
 const responseObj = require("../helpers/json-response");
 const constants = require("../config/constants");
-const mailTemplates = require("../config/mail-templates");
+// const mailTemplates = require("../config/mail-templates");
 const db_gateway = require("../config/db-config");
 const User = require("../model/user.model");
-const Notification = require('../model/notification.model')
+// const Notification = require('../model/notification.model')
 const path = require('path');
 
 const db = new db_gateway();
 const UserModel = new User(db)
-const notification = new Notification(db)
+// const notification = new Notification(db)
 
 login = async (req, res, next) => {
     try {
         const user_id = req.body.user_id;
         const password = req.body.password;
 
-        UserModel.getUserByUserId(user_id, async (err, result) => {
+        UserModel.getUserByUserId(user_id, async (err, result) => { 
             if (err) {
                 return res.json(responseObj.error("Internal Server Error", [err]));
             }
@@ -26,7 +25,7 @@ login = async (req, res, next) => {
             }
 
             if (result[0].password !== password) {
-                return res.json(responseObj.error("Invalid Credential.", []));
+                return res.json(responseObj.error("Password do not match", []));
             }
             return res.json(responseObj.success("Login Successful", result));
         });
@@ -37,70 +36,34 @@ login = async (req, res, next) => {
 
 
 
-signUp = async (req, res, next) => {
+register = async (req, res, next) => {
     try {
+        let name = req.body.name;
+        let passout_year = req.body.passout_year;
+        let phone_number = req.body.phone_number;
         let email = req.body.email;
         let password = req.body.password;
-        let exponent_token = req.body.exponent_token;
-        let user_type = 'DUEVION'
-        UserModel.getUserByEmail(email, async (err, result) => {
-            if (err) {
-                res.json(responseObj.error("Interval Server Error", [err]))
-            } else {
-                if (result.length == 0) {
-                    UserModel.insertRecord('', email, password, '', '', '', user_type, async (err, result) => {
-                        if (err) {
-                            res.json(responseObj.error("Interval Server Error", [err]))
-                        } else {
-                            UserModel.createUserId(email, async (err, result) => {
-                                if (err) {
-                                    res.json(responseObj.error("Internal Server Error", [err]))
-                                } else {
-                                    UserModel.getUserByEmail(email, async (err, result) => {
-                                        if (err) {
-                                            res.json(responseObj.error("Internal Server Error", [err]))
-                                        } else {
-                                            res.json(responseObj.success('Registration Successfull', result))
-                                            const subject = 'Wellcome to DueVion!!!';
-                                            const htmlEmail = mailTemplates.wellcome_to_duevion.template(result[0].user_id);
-                                            await communication_functions.sendEmail(constants.companyEmail, email, subject, htmlEmail, async function (response) {
-                                                // response['extras'].push(otp)
-                                                // res.json(response);
-                                            });
-                                            UserModel.setExponentToken(result[0].user_id, exponent_token, (err, result) => {
-                                                if (err) {
-                                                    console.log("setting expotoken errror signup : ", err)
-                                                }
-                                            })
-                                        }
-                                    })
+        UserModel.getUserByEmail(email,async(err,result)=>{
+            if(err){
+                res.json(responseObj.error("Internal Server Error",[err]))
+            }else{
+                if(result.length == 0){
+                    UserModel.register('',name,passout_year,phone_number,email,password,async(err,result)=>{
+                        if(err){
+                            res.json(responseObj.error("Internal Server Error",[err]))
+                        }else{
+                            let id = result.insertId
+                            UserModel.createUserId(id,passout_year,async(err,result)=>{
+                                if(err){
+                                    res.json(responseObj.error("Internal Server Error",[err]))
+                                }else{
+                                    res.json(responseObj.success("Registration Successfull",[]))
                                 }
                             })
                         }
                     })
-                } else {
-                    if(result[0].is_deleted==1){
-                        UserModel.recoverAccount(email, async (e, r)=>{
-                            if(e){
-                                res.json(responseObj.error("Internal Server Error", [e]))
-                            }else{
-                                res.json(responseObj.success('Registration Successfull', result))
-                                const subject = 'Wellcome to DueVion!!!';
-                                const htmlEmail = mailTemplates.wellcome_to_duevion.template(result[0].user_id);
-                                await communication_functions.sendEmail(constants.companyEmail, email, subject, htmlEmail, async function (response) {
-                                    // response['extras'].push(otp)
-                                    // res.json(response);
-                                });
-                                UserModel.setExponentToken(result[0].user_id, exponent_token, (err, result) => {
-                                    if (err) {
-                                        console.log("setting expotoken errror signup : ", err)
-                                    }
-                                })
-                            }
-                        })
-                    }else{
-                        res.json(responseObj.error("Email Allready Registered", []))
-                    }
+                }else{
+                    res.json(responseObj.error("Email Already Registered",[]))
                 }
             }
         })
@@ -109,6 +72,47 @@ signUp = async (req, res, next) => {
     }
 
 }
+fetch_user = async(req,res,next) => {
+    try{
+        let user_id = req.body.alumniId
+        UserModel.getUserByUserId(user_id,async(err,result)=>{
+            if(err){
+                res.json(responseObj.error("Internal Server Error",[]))
+            }else{
+                return res.json(responseObj.success("User Fetched",result))
+            }
+        })
+    }catch(err){
+        next(err)
+    }
+}
+editProfile = async (req,res,next) => {
+    try{
+        let name = req.body.name;
+        let passout_year = req.body.passoutYear;
+        let designation = req.body.designation;
+        let location = req.body.location;
+        let phone_number = req.body.phoneNo;
+        let whatsapp_number = req.body.whatsappNo;
+        let email = req.body.email;
+        let linkedin = req.body.linkedin;
+        let current_addr = req.body.currentAddress;
+        let permanent_addr = req.body.permanentAddress;
+        let skills = req.body.skills;
+        let user_id = req.body.userId;
+        UserModel.editProfile(name,passout_year,designation,location,phone_number,whatsapp_number,email,linkedin,current_addr,permanent_addr,skills,user_id,async(err,result)=>{
+            if(err){
+                res.json(responseObj.error("Internal Server Error",[err]));
+            }else{
+                res.json(responseObj.success("Profile Edited Successfully",result));
+            }
+        })
+    }catch(err){
+        next(err)
+    }
+}
+
+
 logout = async (req, res, next) => {
     try {
         let user_id = req.body.user_id;
@@ -126,5 +130,5 @@ logout = async (req, res, next) => {
     }
 }
 module.exports = {
-    login, signUp ,logout
+    login, register ,editProfile,fetch_user,logout
 };
