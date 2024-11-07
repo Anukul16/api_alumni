@@ -5,6 +5,7 @@ const userLoginController = require("../controllers/user.controller");
 
 /* GET home page. */
 router.post('/fetch_user',userLoginController.fetch_user)
+router.post('/fetch_profile',userLoginController.fetchProfile)
 router.post('/login', userLoginController.login);
 router.post('/register',userLoginController.register)
 router.post('/edit_profile',userLoginController.editProfile)

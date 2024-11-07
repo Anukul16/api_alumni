@@ -100,17 +100,105 @@ editProfile = async (req,res,next) => {
         let permanent_addr = req.body.permanentAddress;
         let skills = req.body.skills;
         let user_id = req.body.userId;
+        let companies = JSON.parse(req.body.companies);
         UserModel.editProfile(name,passout_year,designation,location,phone_number,whatsapp_number,email,linkedin,current_addr,permanent_addr,skills,user_id,async(err,result)=>{
             if(err){
                 res.json(responseObj.error("Internal Server Error",[err]));
             }else{
-                res.json(responseObj.success("Profile Edited Successfully",result));
+
+                UserModel.addCompanies(companies,(err,result)=>{
+                    if(err){
+                        res.json(responseObj.error("Internal Server Error",[err]))
+                    }else{
+                        UserModel.getCompanyIds(companies,(err,companyRows)=>{
+                            if(err){
+                                res.json(responseObj.error("Internal Server Error ",[err]))
+                            }else{
+                                const companyIdsMap = {};
+                                companyRows.forEach(row => {
+                                    companyIdsMap[row.company_name]=row.company_id
+                                })
+                                const rolesData = [];
+                                companies.forEach(company => {
+                                    const companyId = companyIdsMap[company.companyName]
+                                    company.roles.forEach(role => {
+                                        rolesData.push([user_id,companyId,role.role,role.startDate,role.endDate])
+                                    })
+                                })
+                                UserModel.addRoles(rolesData,(err,result)=>{
+                                    if(err){
+                                        res.json(responseObj.error("Internal Server Error",[err]))
+                                    }else{
+                                        res.json(responseObj.success("Profile Edited Successfully",[result]))
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
             }
         })
     }catch(err){
         next(err)
     }
 }
+
+fetchProfile = async(req,res,next) => {
+    let user_id = req.body.alumniId;
+    UserModel.getExperienceDetails(user_id,async(err,exp)=>{
+        if(err){
+            res.json(responseObj.error("Internal Server Error",[err]))
+        }else{
+            const formattedExperience = formatExperience(exp)
+            console.log("Format: ",formattedExperience);
+            
+            UserModel.getProfileDetails(user_id,async(err,result)=>{
+                if(err){
+                    res.json(responseObj.error("Internal Server Error",[err]))
+                }else{
+                    const profileDetails={
+                        profile:result,
+                        formattedExperience
+                    }
+                    res.json(responseObj.success("Profile Fetched Successfully",[profileDetails]))
+                }
+            })
+            
+        }
+    })
+}
+const formatExperience = (experince) => {
+    const formattedExperience = [];
+    let set = new Set();
+    experince.forEach(item => {
+        let companyIdx = 0;
+        if(!set.has(item.company_name)){
+            set.add(item.company_name)
+            companyIdx=-1;
+        }
+        if(companyIdx === -1){
+            formattedExperience.push({
+                companyLogo:item.company_logo,
+                companyName:item.company_name,
+                roles:[
+                    {
+                        role:item.role_name,
+                        start_date:item.start_date,
+                        end_date:item.end_date
+                    }
+                ]
+            })
+        }else{
+            formattedExperience[companyIdx].roles.push({
+                role:item.role_name,
+                start_date:item.start_date,
+                end_date:item.end_date
+            })
+        }
+    })
+    return formattedExperience
+}
+
 
 
 logout = async (req, res, next) => {
@@ -130,5 +218,5 @@ logout = async (req, res, next) => {
     }
 }
 module.exports = {
-    login, register ,editProfile,fetch_user,logout
+    login, register ,editProfile,fetch_user,fetchProfile,logout
 };

@@ -30,6 +30,43 @@ class user_detailsModel {
         var params = [name, passout_year, designation, location, phone_number, whatsapp_number, email, linkedin, current_addr, permanent_addr, skills, user_id];
         this.db.query(sql, params, callBack);
     }
+    addCompanies(companies, callBack) {
+        const sql = `
+            INSERT INTO \`company\` (\`company_name\`, \`company_logo\`) 
+            VALUES ? 
+            ON DUPLICATE KEY UPDATE \`company_logo\` = VALUES(\`company_logo\`)
+        `;
+        const companyData = companies.map(company => [company.companyName, company.companyLogo]);
+        this.db.query(sql, [companyData], callBack);
+    }
+    addRoles(rolesData,callBack){
+        const sql = "INSERT INTO `user_roles` (`user_id`,`company_id`,`role_name`,`start_date`,`end_date`) VALUES ?";
+        this.db.query(sql,[rolesData],callBack);
+    }
+    getCompanyIds(companies,callBack){
+        const sql = "SELECT `company_id`,`company_name` from `company` where `company_name` in(?)";
+        const companyNames = companies.map(company =>company.companyName)
+        this.db.query(sql,[companyNames],callBack)
+    }
+    getProfileDetails(user_id,callBack){
+        const sql = "SELECT*FROM `users` WHERE `user_id`=?";
+        this.db.query(sql,[user_id],callBack)
+    }
+    getExperienceDetails(user_id,callBack){
+        const sql = `
+                    SELECT 
+                        c.company_logo,
+                        c.company_name,
+                        ur.role_name,
+                        ur.start_date,
+                        ur.end_date
+                    FROM \`users\` u
+                    JOIN \`user_roles\` ur ON u.user_id = ur.user_id
+                    JOIN \`company\` c ON ur.company_id = c.company_id
+                    WHERE u.user_id = ?;
+                    `;
+        this.db.query(sql,[user_id],callBack)
+    }
     
     createUserId(id,passout_year, callBack) {
         this.db.execute(
