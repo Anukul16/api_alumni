@@ -200,6 +200,28 @@ const formatExperience = (experince) => {
 }
 
 
+deleteProfilePicture = async(req,res,next) => {
+    let user_id = req.body.alumniId;
+    UserModel.deleteProfilePicture(user_id,(err,result)=>{
+        if(err){
+            res.json(responseObj.error("Internal Server Error",[err]))
+        }else{
+            res.json(responseObj.success("Profile Picture Deleted Successfully",[result]))
+        }
+    })
+}
+deleteCoverPicture = async(req,res,next) => {
+    let user_id = req.body.alumniId;
+    UserModel.deleteCoverPicture(user_id,(err,result)=>{
+        if(err){
+            res.json(responseObj.error("Internal Server Error",[err]))
+        }else{
+            res.json(responseObj.success("Cover Picture Deleted Successfully",[result]))
+
+        }
+    })
+}
+
 
 logout = async (req, res, next) => {
     try {
@@ -218,5 +240,5 @@ logout = async (req, res, next) => {
     }
 }
 module.exports = {
-    login, register ,editProfile,fetch_user,fetchProfile,logout
+    login, register ,editProfile,fetch_user,fetchProfile,deleteProfilePicture,deleteCoverPicture,logout
 };

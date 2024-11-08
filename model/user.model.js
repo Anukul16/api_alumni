@@ -82,6 +82,24 @@ class user_detailsModel {
             callBack
         )
     }
+    addProfilePicture(user_id,img,callBack){
+        const sql = "UPDATE `users` SET profile = ? WHERE `user_id` = ?"
+        console.log(img);
+        
+        this.db.query(sql,[img.filename,user_id],callBack)
+    }
+    addCoverPicture(user_id,img,callBack){
+        const sql = "UPDATE `users` SET cover = ? WHERE `user_id` = ?"
+        this.db.query(sql,[img.filename,user_id],callBack)
+    }
+    deleteProfilePicture(user_id, callBack) {
+        const sql = "UPDATE `users` SET `profile` = NULL WHERE `user_id` = ?";
+        this.db.execute(sql, [user_id], callBack);
+    }
+    deleteCoverPicture(user_id,callBack){
+        const sql = "UPDATE `users` SET `cover` = NULL WHERE `user_id` = ?";
+        this.db.execute(sql, [user_id], callBack);
+    }    
     getUserByEmail(email, callBack) {
         this.db.query(
             "SELECT * FROM `users` WHERE email=?",
