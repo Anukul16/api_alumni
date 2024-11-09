@@ -7,6 +7,7 @@ const db_gateway = require('./config/db-config');
 const userRoute = require('./routes/users');  // Import userRoute
 const userLikeRoute = require('./routes/userLikes')
 const uploadRoute = require('./routes/uploadRoute')
+const adminRoute = require('./routes/admin')
 const app = express();
 const db = new db_gateway();
 
@@ -23,7 +24,7 @@ app.use('/access', express.static(path.join(__dirname, 'assets/uploads')));
 app.use('/users', userRoute);  
 app.use('/userlike',userLikeRoute);
 app.use('/uploads',uploadRoute);
-
+app.use('/admin',adminRoute)
 app.get('/', (req, res) => res.send('Hello World'));
 
 // Error handling

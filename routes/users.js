@@ -11,6 +11,8 @@ router.post('/register',userLoginController.register)
 router.post('/edit_profile',userLoginController.editProfile)
 router.post('/delete_profile_pic',userLoginController.deleteProfilePicture)
 router.post('/delete_cover_pic',userLoginController.deleteCoverPicture)
+
+
 router.post('/logout', userLoginController.logout)
 
 module.exports = router;
