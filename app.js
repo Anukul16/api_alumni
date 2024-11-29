@@ -14,11 +14,11 @@ const db = new db_gateway();
 app.use(cors({ origin: '*' }));
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/upload',express.static(path.join(__dirname, 'assets/uploads')));
-app.use('/access', express.static(path.join(__dirname, 'assets/uploads')));
+app.use('/access', express.static(path.join(__dirname, 'assets')));
 
 // Define routes
 app.use('/users', userRoute);  

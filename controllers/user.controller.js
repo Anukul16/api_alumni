@@ -150,7 +150,7 @@ fetchProfile = async(req,res,next) => {
             res.json(responseObj.error("Internal Server Error",[err]))
         }else{
             const formattedExperience = formatExperience(exp)
-            console.log("Format: ",formattedExperience);
+            // console.log("Format: ",formattedExperience);
             
             UserModel.getProfileDetails(user_id,async(err,result)=>{
                 if(err){
@@ -239,6 +239,149 @@ logout = async (req, res, next) => {
         next(error)
     }
 }
+
+allEmployeeOfACompany = async(req,res)=>{
+    try {
+        let company = req.body.com;
+        console.log(company);
+        UserModel.getAllEmployeeOfACompany(company, (err, result) => {
+            if (err) {
+                console.log("Database error:", err); 
+                res.json(responseObj.error("Internal Server Error", [err]));
+            } else {
+                return res.json(responseObj.success("All Employee Of A Company", result));
+            }
+        });
+        
+        
+    } catch (error) {
+        console.log(error);
+        
+        
+    }
+}
+
+batchWise = async(req,res)=>{
+    try {
+        let passout_year = req.body.passoutYear
+        UserModel.getBatchWise(passout_year , (err,result)=>{
+            if(err){
+                console.log("Database error:", err);  // Log the specific error
+                res.json(responseObj.error("Internal Server Error", [err]));
+                
+            }else{
+                return res.json(responseObj.success("All student of this batch" , result))
+            }
+        })
+        
+    } catch (error) {
+        console.log(error);
+        
+
+        
+    }
+}
+
+techStackWise = async(req,res)=>{
+    try {
+        let tech_stack = req.body.techStack;
+        UserModel.getTechWise(tech_stack , (err,result)=>{
+            if(err){
+                console.log("Database error:", err);  // Log the specific error
+                res.json(responseObj.error("Internal Server Error" , [err]))
+            }else{
+                return res.json(responseObj.success("All student of this batch" , result))
+            }
+        })
+        
+    } catch (error) {
+        console.log(error);
+            
+    }
+
+}
+
+allCompanyName = async(req,res)=>{
+    try {
+        UserModel.getAllCompanyName((err,result)=>{
+            if(err){
+                console.log("Database error:" , err);
+                res.json(responseObj.error("Internal Server Error", [err]));
+            }else{
+                return res.json(responseObj.success("All Company name" , result))
+            }
+
+        })
+        
+    } catch (error) {
+        console.log(error);
+        
+        
+    }
+}
+allAlumni = async(req,res)=>{
+    try {
+        UserModel.getAllAlumni((err,result)=>{
+            if(err){
+                console.log("Database Error" , err);
+                res.json(responseObj.error("Internal Server Error", [err]));   
+            }else{
+                return res.json(responseObj.success("All Alumni" , result));
+            }
+        })
+        
+    } catch (error) {
+        console.log(error);
+        
+        
+    }
+}
+allBatchYears = async(req,res)=>{
+    try {
+        UserModel.getAllBatchYears((err,result)=>{
+            if(err){
+                console.log("Database Error" , err);
+                res.json(responseObj.error("Internal Server Error", [err]));   
+
+            }else{
+                return res.json(responseObj.success("All Batch Years" , result));
+            }
+        })
+        
+    } catch (error) {
+        console.log(error);
+        
+    }
+
+}
+
+allTechStack = async(req,res)=>{
+    try {
+        UserModel.getAllTechStack((err,result)=>{
+            if(err){
+                console.log("Database Error" , err);
+                res.json(responseObj.error("Internal Server Error", [err]));
+            }else{
+                return res.json(responseObj.success("All Tech Stack" , result));
+            }
+        })
+        
+    } catch (error) {
+        console.log(error);
+        
+        
+    }
+}
+
+searchApi = async(req,res)=>{
+    try {
+        
+
+        
+    } catch (error) {
+        
+    }
+}
 module.exports = {
-    login, register ,editProfile,fetch_user,fetchProfile,deleteProfilePicture,deleteCoverPicture,logout
+    login, register ,editProfile,fetch_user,fetchProfile,deleteProfilePicture,deleteCoverPicture,logout,allEmployeeOfACompany , batchWise  , techStackWise, allCompanyName , allAlumni ,allBatchYears ,allTechStack
 };

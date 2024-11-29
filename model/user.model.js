@@ -202,5 +202,55 @@ class user_detailsModel {
             callBack
         );
     }
+
+    getAllEmployeeOfACompany(company , callBack) {
+        // let sql = "SELECT `user_id`,`img`,`name`,`passout_year` FROM users WHERE company = ?";
+        let sql = "SELECT * FROM users WHERE company = ?";
+        this.db.query(sql, [company], callBack);
+      }
+    
+      getAllCompanyName(callBack){
+        let sql = "SELECT `company` FROM users";
+        this.db.query(sql,[],callBack)
+    
+      }
+      getAllBatchYears(callBack){
+        let sql = "SELECT `passout_year` FROM users";
+        this.db.query(sql,[],callBack)
+      }
+    
+    
+      getBatchWise(passout_year , callBack){
+        let sql = "SELECT * FROM users WHERE passout_year = ?";
+        this.db.query(sql,[passout_year] , callBack);
+      }
+    
+      
+      getTechWise(tech_wise , callBack){
+        let sql = "SELECT * FROM users WHERE LOWER(skills) LIKE ?";
+        const formattedValue = `%${tech_wise.toLowerCase()}%`;
+        this.db.query(sql,[formattedValue] , callBack);
+      }
+    
+    
+      
+      getAllAlumni(callBack){
+        let sql = "SELECT * FROM users";
+        this.db.query(sql,[],callBack);
+      }
+    
+      getAllTechStack(callBack){
+        let sql = "SELECT skills FROM users";
+        this.db.query(sql,[],callBack)
+      }
+    
+      getSearchedData(searchTerm,callBack){
+        let sql = "SELECT * FROM users WHERE LOWER(name) LIKE ?"
+        const formattedValue = `%${searchTerm.toLowerCase()}%`
+        this.db.query(sql,[formattedValue],callBack);
+        
+    
+      }
+    
 }
 module.exports = user_detailsModel;

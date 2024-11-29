@@ -38,9 +38,84 @@ unlikeAlumni = async(req,res,next) =>{
         }
     })
 }
+fetchFollowers = async(req,res,next) => {
+    try{
+        let user_id = req.body.user_id;
+        UserlikeModel.getFollowers(user_id,(err,followers)=>{
+            if(err){
+                res.json(responseObj.error("Internal Server Error",[err]));
+            }else{
+                UserlikeModel.getFollowing(user_id,(err,following)=>{
+                    if(err){
+                        res.json(responseObj.error("Internal Server Error",[err]))
+                    }else{
+                        const result = followers.map((follower)=>({
+                            ...follower,
+                            isFollowingBack:following.some(f => f.user_id === follower.user_id)
+                        }))
+                        res.json(responseObj.success("Success",[result]))
+                    }
+                    
+                })
+            }
+        })
+    }catch(err){    
+        console.log(err);
+    }
+}
+countFollowers =async(req,res,next) => {
+    try{
+        let user_id = req.body.alumniId;
+        UserlikeModel.countFollowers(user_id,(err,result)=>{
+            if(err){
+                res.json(responseObj.error("Internal Server Error",[err]));
+            }else{
+                res.json(responseObj.success("Success",[result]));
+            }
+        })
+    }catch(err){
+        console.log(err);
+    }
+}
+
+fetchFollowing = async(req,res,next) => {
+    try{
+        let user_id = req.body.user_id;
+        UserlikeModel.getFollowing(user_id,(err,result)=>{
+            if(err){
+                res.json(responseObj.error("Internal Server Error",[err]));
+            }else{
+                res.json(responseObj.success("Followers Fetched",[result]))
+            }
+        })
+    }catch(err){    
+        console.log(err);
+    }
+}
+countFollowing =async(req,res,next) => {
+    try{
+        let user_id = req.body.alumniId;
+        UserlikeModel.countFollowing(user_id,(err,result)=>{
+            if(err){
+                res.json(responseObj.error("Internal Server Error",[err]));
+                console.log(err);
+                
+            }else{
+                res.json(responseObj.success("Success",[result]));
+            }
+        })
+    }catch(err){
+        console.log(err);
+    }
+}
+
 
 module.exports = {
     likeAlumni,
     fetchLikeAlumniIds,
-    unlikeAlumni
+    unlikeAlumni,
+    fetchFollowers,
+    fetchFollowing,
+    countFollowers,
+    countFollowing
 }
